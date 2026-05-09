@@ -16,10 +16,11 @@ async function bootstrap(): Promise<void> {
 
   app.useLogger(app.get(Logger));
   app.enableShutdownHooks();
+  app.setGlobalPrefix('api');
 
   await app.register(helmet);
   await app.register(rateLimit, {
-    max: (req: FastifyRequest) => (req.url?.startsWith('/auth') ? 10 : 60),
+    max: (req: FastifyRequest) => (req.url?.startsWith('/api/auth') ? 10 : 60),
     timeWindow: '1 minute',
   });
   await app.register(fastifyCookie);
