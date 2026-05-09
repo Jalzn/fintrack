@@ -2,6 +2,9 @@
 set -e
 
 RESOLVER_ADDR=$(awk '/^nameserver/ {print $2; exit}' /etc/resolv.conf)
+case "$RESOLVER_ADDR" in
+  *:*) RESOLVER_ADDR="[$RESOLVER_ADDR]" ;;
+esac
 export RESOLVER_ADDR
 
 echo "Detected resolver: $RESOLVER_ADDR"
