@@ -4,6 +4,7 @@ import type {
   GroceryReceipt,
   GrocerySettings,
   GrocerySummary,
+  GroceryUnit,
   PaginatedReceipts,
   PriceAnalysis,
 } from '@/types/api';
@@ -112,6 +113,33 @@ export function listReceipts(filters: ReceiptListFilters): Promise<PaginatedRece
 
 export function getReceiptById(id: string): Promise<GroceryReceipt> {
   return apiFetch<GroceryReceipt>(`/grocery-receipts/${id}`, { schema: groceryReceiptSchema });
+}
+
+export interface UpdateReceiptItemPayload {
+  id?: string;
+  normalizedName: string;
+  quantity: number;
+  unit: GroceryUnit;
+  unitPriceMinorUnits: number;
+  brand?: string | null;
+  code?: string | null;
+  department?: string | null;
+  size?: string | null;
+}
+
+export interface UpdateReceiptPayload {
+  storeName: string;
+  purchaseDate: string;
+  totalMinorUnits: number;
+  items: UpdateReceiptItemPayload[];
+}
+
+export function updateReceipt(id: string, body: UpdateReceiptPayload): Promise<GroceryReceipt> {
+  return apiFetch<GroceryReceipt>(`/grocery-receipts/${id}`, {
+    method: 'PUT',
+    body,
+    schema: groceryReceiptSchema,
+  });
 }
 
 export function deleteReceipt(id: string): Promise<void> {

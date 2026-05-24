@@ -13,6 +13,7 @@ import {
   type IReceiptExtractor,
   ListReceiptsUseCase,
   UpdateGrocerySettingsUseCase,
+  UpdateReceiptUseCase,
 } from '@/grocery-receipts/application';
 import type {
   IGroceryReceiptRepository,
@@ -24,6 +25,7 @@ import { ID_GENERATOR } from '@/shared/infrastructure/shared.tokens';
 import type {
   CreateTransactionUseCase,
   DeleteTransactionUseCase,
+  UpdateTransactionUseCase,
 } from '@/transactions/application';
 import type { ICategoryRepository, ISubcategoryRepository } from '@/transactions/domain';
 import {
@@ -31,9 +33,11 @@ import {
   CREATE_TRANSACTION_UC,
   DELETE_TRANSACTION_UC,
   SUBCATEGORY_REPOSITORY,
+  UPDATE_TRANSACTION_UC,
 } from '@/transactions/infrastructure/tokens';
 import { TransactionsModule } from '@/transactions/infrastructure/transactions.module';
 import { UsersModule } from '@/users/infrastructure/users.module';
+import { SyncReceiptOnTransactionUpdatedHandler } from './event-handlers/sync-receipt-on-transaction-updated.handler';
 import { GroceryReceiptsController } from './http/grocery-receipts.controller';
 import {
   DrizzleGroceryReceiptRepository,
@@ -52,6 +56,7 @@ import {
   LIST_RECEIPTS_UC,
   RECEIPT_EXTRACTOR,
   UPDATE_GROCERY_SETTINGS_UC,
+  UPDATE_RECEIPT_UC,
 } from './tokens';
 
 @Module({
@@ -117,6 +122,22 @@ import {
       inject: [GROCERY_RECEIPT_REPOSITORY],
     },
     {
+      provide: UPDATE_RECEIPT_UC,
+      useFactory: (
+        groceryReceiptRepository: IGroceryReceiptRepository,
+        updateTransactionUseCase: UpdateTransactionUseCase,
+        idGenerator: IIdGenerator,
+        logger: PinoLogger,
+      ) =>
+        new UpdateReceiptUseCase({
+          groceryReceiptRepository,
+          updateTransactionUseCase,
+          idGenerator,
+          logger,
+        }),
+      inject: [GROCERY_RECEIPT_REPOSITORY, UPDATE_TRANSACTION_UC, ID_GENERATOR, PinoLogger],
+    },
+    {
       provide: DELETE_RECEIPT_UC,
       useFactory: (
         groceryReceiptRepository: IGroceryReceiptRepository,
@@ -157,6 +178,7 @@ import {
         }),
       inject: [GROCERY_SETTINGS_REPOSITORY, CATEGORY_REPOSITORY, SUBCATEGORY_REPOSITORY],
     },
+    SyncReceiptOnTransactionUpdatedHandler,
   ],
 })
 export class GroceryReceiptsModule {}

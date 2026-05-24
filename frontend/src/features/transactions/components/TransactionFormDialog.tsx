@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { AmountInput } from '@/components/AmountInput';
 import { CategoryCombobox } from '@/components/CategoryCombobox';
+import { DatePicker } from '@/components/DatePicker';
 import { SubcategoryCombobox } from '@/components/SubcategoryCombobox';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,7 +31,6 @@ import type { Transaction, TransactionType } from '@/types/api';
 import { useCreateTransactionMutation } from '../hooks/use-create-transaction';
 import { useUpdateTransactionMutation } from '../hooks/use-update-transaction';
 import { type TransactionFormInput, transactionFormSchema } from '../schemas/transaction-schemas';
-import { DatePicker } from './DatePicker';
 
 const TYPE_OPTIONS = [
   { value: 'EXPENSE', label: 'Despesa' },

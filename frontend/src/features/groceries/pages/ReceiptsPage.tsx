@@ -4,6 +4,7 @@ import { usePeriod } from '@/hooks/use-period';
 import type { GroceryReceipt } from '@/types/api';
 import { DeleteReceiptAlert } from '../components/DeleteReceiptAlert';
 import { ReceiptDetailDialog } from '../components/ReceiptDetailDialog';
+import { ReceiptEditDialog } from '../components/ReceiptEditDialog';
 import { ReceiptList } from '../components/ReceiptList';
 import { useReceiptsQuery } from '../hooks/use-receipts-query';
 
@@ -14,6 +15,7 @@ export function ReceiptsPage() {
   const { period, range } = usePeriod();
   const [page, setPage] = useState(1);
   const [viewingId, setViewingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<GroceryReceipt | null>(null);
 
   // Reset to the first page whenever the global period changes (adjust-during-render pattern).
@@ -37,6 +39,7 @@ export function ReceiptsPage() {
         isLoading={isLoading}
         isError={isError}
         onView={setViewingId}
+        onEdit={(receipt) => setEditingId(receipt.id)}
         onDelete={setDeleting}
       />
       {data && data.totalPages > 1 ? (
@@ -67,6 +70,12 @@ export function ReceiptsPage() {
         receiptId={viewingId}
         onOpenChange={(open) => {
           if (!open) setViewingId(null);
+        }}
+      />
+      <ReceiptEditDialog
+        receiptId={editingId}
+        onOpenChange={(open) => {
+          if (!open) setEditingId(null);
         }}
       />
       <DeleteReceiptAlert

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { GROCERY_DEPARTMENT_SLUGS } from './extracted-receipt.schema';
 
 export const ImportReceiptInputSchema = z.object({
   userId: z.string().min(1),
@@ -66,3 +67,26 @@ export const UpdateGrocerySettingsInputSchema = z.object({
   subcategoryId: z.string().min(1).nullish(),
 });
 export type UpdateGrocerySettingsInput = z.infer<typeof UpdateGrocerySettingsInputSchema>;
+
+const UpdateReceiptItemSchema = z.object({
+  id: z.string().min(1).optional(),
+  normalizedName: z.string().trim().min(1).max(255),
+  rawDescription: z.string().trim().min(1).max(500).optional(),
+  quantity: z.number().positive(),
+  unit: z.enum(['un', 'kg', 'L']),
+  unitPriceMinorUnits: z.number().int().nonnegative(),
+  brand: z.string().trim().max(120).nullish(),
+  code: z.string().trim().max(32).nullish(),
+  department: z.enum(GROCERY_DEPARTMENT_SLUGS).nullish(),
+  size: z.string().trim().max(32).nullish(),
+});
+
+export const UpdateReceiptInputSchema = z.object({
+  id: z.string().min(1),
+  userId: z.string().min(1),
+  storeName: z.string().trim().min(1).max(255),
+  purchaseDate: z.coerce.date(),
+  totalMinorUnits: z.number().int().positive(),
+  items: z.array(UpdateReceiptItemSchema).min(1),
+});
+export type UpdateReceiptInput = z.infer<typeof UpdateReceiptInputSchema>;

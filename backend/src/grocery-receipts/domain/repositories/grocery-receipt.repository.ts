@@ -39,6 +39,7 @@ export interface ReceiptTotalEntry {
 
 export interface IGroceryReceiptRepository {
   findById(id: string, userId: string): Promise<GroceryReceipt | null>;
+  findByTransactionId(transactionId: string, userId: string): Promise<GroceryReceipt | null>;
   findAll(filters: FindReceiptFilters): Promise<PaginatedReceipts>;
   findItemPriceHistory(filters: FindItemPriceHistoryFilters): Promise<ItemPriceHistoryEntry[]>;
   findReceiptTotals(filters: FindItemPriceHistoryFilters): Promise<ReceiptTotalEntry[]>;
