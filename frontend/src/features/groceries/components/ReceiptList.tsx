@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { formatDateOnly } from '@/lib/date';
 import { formatMoney } from '@/lib/money';
 import type { GroceryReceipt } from '@/types/api';
 
@@ -58,7 +58,7 @@ export function ReceiptList({
     body = receipts.map((receipt) => (
       <TableRow key={receipt.id}>
         <TableCell className="font-medium">{receipt.storeName}</TableCell>
-        <TableCell>{format(new Date(receipt.purchaseDate), 'dd/MM/yyyy')}</TableCell>
+        <TableCell>{formatDateOnly(receipt.purchaseDate, 'dd/MM/yyyy')}</TableCell>
         <TableCell className="text-right font-medium text-expense">
           {formatMoney(receipt.total)}
         </TableCell>

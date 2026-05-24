@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router';
@@ -8,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCategoriesQuery } from '@/features/categories/hooks/use-categories-query';
 import { useTransactionsQuery } from '@/features/transactions/hooks/use-transactions-query';
 import { colorFromHex } from '@/lib/category-colors';
+import { formatDateOnly } from '@/lib/date';
 import { formatMoney } from '@/lib/money';
 import { cn } from '@/lib/utils';
 
@@ -70,7 +70,7 @@ export function RecentTransactions() {
                         {category?.name ?? '—'}
                       </Badge>
                       <span>·</span>
-                      <span>{format(new Date(t.date), "d 'de' MMM", { locale: ptBR })}</span>
+                      <span>{formatDateOnly(t.date, "d 'de' MMM", { locale: ptBR })}</span>
                     </div>
                   </div>
                   <span

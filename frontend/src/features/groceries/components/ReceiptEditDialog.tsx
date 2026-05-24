@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApiError } from '@/lib/api-client';
+import { dateToApiDateOnly, parseDateOnly } from '@/lib/date';
 import { formatMoney } from '@/lib/money';
 import type { GroceryUnit, MoneySnapshot } from '@/types/api';
 import { useReceiptQuery } from '../hooks/use-receipt-query';
@@ -78,7 +79,7 @@ export function ReceiptEditDialog({ receiptId, onOpenChange }: ReceiptEditDialog
     loadedIdRef.current = data.id;
     reset({
       storeName: data.storeName,
-      purchaseDate: new Date(data.purchaseDate),
+      purchaseDate: parseDateOnly(data.purchaseDate),
       totalMinorUnits: data.total.amount,
       items: data.items.map((item) => ({
         id: item.id,
@@ -113,7 +114,7 @@ export function ReceiptEditDialog({ receiptId, onOpenChange }: ReceiptEditDialog
         id: receiptId,
         payload: {
           storeName: values.storeName,
-          purchaseDate: values.purchaseDate.toISOString(),
+          purchaseDate: dateToApiDateOnly(values.purchaseDate),
           totalMinorUnits: values.totalMinorUnits,
           items: values.items.map((item) => ({
             ...(item.id ? { id: item.id } : {}),

@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import { Bar, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from 'recharts';
 import {
   type ChartConfig,
@@ -14,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatDateOnly } from '@/lib/date';
 import { formatMoney, moneyToNumber } from '@/lib/money';
 import { usePriceAnalysisQuery } from '../hooks/use-price-analysis-query';
 
@@ -33,7 +33,7 @@ export function ProductHistoryDialog({ normalizedName, onOpenChange }: ProductHi
 
   const rows =
     product?.occurrences.map((occurrence) => ({
-      label: format(new Date(occurrence.date), 'dd/MM/yy'),
+      label: formatDateOnly(occurrence.date, 'dd/MM/yy'),
       price: moneyToNumber(occurrence.unitPrice),
       money: occurrence.unitPrice,
       quantity: occurrence.quantity,
