@@ -22,10 +22,7 @@ export class CalculateBalanceUseCase {
       endDate: parsed.endDate,
     });
 
-    const { balance, income, expense } = this.deps.balanceService.calculate(
-      transactions,
-      currency,
-    );
+    const { balance, income, expense } = this.deps.balanceService.calculate(transactions, currency);
     return {
       balance: balance.toSnapshot(),
       income: income.toSnapshot(),

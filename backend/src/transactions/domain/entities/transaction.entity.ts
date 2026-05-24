@@ -103,6 +103,12 @@ export class Transaction extends AggregateRoot {
   }
 
   update(props: UpdateTransactionProps): void {
+    const previous = {
+      amount: this._amount.toSnapshot(),
+      categoryId: this._categoryId,
+      subcategoryId: this._subcategoryId,
+      date: this._date,
+    };
     const next = {
       amount: props.amount ?? this._amount,
       categoryId: props.categoryId ?? this._categoryId,
@@ -126,6 +132,7 @@ export class Transaction extends AggregateRoot {
         subcategoryId: this._subcategoryId,
         description: this._description,
         date: this._date,
+        previous,
       }),
     );
   }

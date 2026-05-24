@@ -3,6 +3,9 @@ import { Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { AmountInput } from '@/components/AmountInput';
+import { CategoryCombobox } from '@/components/CategoryCombobox';
+import { SubcategoryCombobox } from '@/components/SubcategoryCombobox';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,10 +30,7 @@ import type { Transaction, TransactionType } from '@/types/api';
 import { useCreateTransactionMutation } from '../hooks/use-create-transaction';
 import { useUpdateTransactionMutation } from '../hooks/use-update-transaction';
 import { type TransactionFormInput, transactionFormSchema } from '../schemas/transaction-schemas';
-import { AmountInput } from './AmountInput';
-import { CategoryCombobox } from './CategoryCombobox';
 import { DatePicker } from './DatePicker';
-import { SubcategoryCombobox } from './SubcategoryCombobox';
 
 const TYPE_OPTIONS = [
   { value: 'EXPENSE', label: 'Despesa' },

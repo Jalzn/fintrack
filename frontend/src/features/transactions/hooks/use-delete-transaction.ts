@@ -7,7 +7,12 @@ export function useDeleteTransactionMutation() {
   return useMutation<void, Error, string>({
     mutationFn: deleteTransaction,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: transactionKeys.all });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
+        queryClient.invalidateQueries({
+          predicate: (q) => q.queryKey[0] === 'budgets',
+        }),
+      ]);
     },
   });
 }

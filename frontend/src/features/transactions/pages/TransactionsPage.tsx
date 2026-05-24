@@ -2,12 +2,14 @@ import { Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { Button } from '@/components/ui/button';
+import { usePeriod } from '@/hooks/use-period';
 import type { Transaction, TransactionType } from '@/types/api';
 import type { TransactionListFilters } from '../api/keys';
 import { DeleteTransactionAlert } from '../components/DeleteTransactionAlert';
 import { Pagination } from '../components/Pagination';
 import { TransactionFilters, type TypeFilter } from '../components/TransactionFilters';
 import { TransactionFormDialog } from '../components/TransactionFormDialog';
+import { TransactionsSummary } from '../components/TransactionsSummary';
 import { TransactionTable } from '../components/TransactionTable';
 import { useTransactionsQuery } from '../hooks/use-transactions-query';
 
@@ -19,6 +21,7 @@ function isType(value: string | null): value is TypeFilter {
 
 export function TransactionsPage() {
   const [params, setParams] = useSearchParams();
+  const { range } = usePeriod();
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState<Transaction | null>(null);
@@ -30,13 +33,21 @@ export function TransactionsPage() {
   const pageParam = Number.parseInt(params.get('page') ?? '1', 10);
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
-  const filters = useMemo<TransactionListFilters>(() => {
-    const result: TransactionListFilters = { page, limit: PAGE_LIMIT };
+  const baseFilters = useMemo<Omit<TransactionListFilters, 'page' | 'limit'>>(() => {
+    const result: Omit<TransactionListFilters, 'page' | 'limit'> = {
+      startDate: range.startDate,
+      endDate: range.endDate,
+    };
     if (type !== 'all') result.type = type as TransactionType;
     if (categoryId) result.categoryId = categoryId;
     if (subcategoryId) result.subcategoryId = subcategoryId;
     return result;
-  }, [page, type, categoryId, subcategoryId]);
+  }, [type, categoryId, subcategoryId, range.startDate, range.endDate]);
+
+  const filters = useMemo<TransactionListFilters>(
+    () => ({ ...baseFilters, page, limit: PAGE_LIMIT }),
+    [baseFilters, page],
+  );
 
   const { data, isLoading, isError } = useTransactionsQuery(filters);
 
@@ -73,6 +84,8 @@ export function TransactionsPage() {
         subcategoryId={subcategoryId}
         onSubcategoryChange={(id) => updateParams({ subcategoryId: id })}
       />
+
+      <TransactionsSummary filters={baseFilters} />
 
       <TransactionTable
         transactions={data?.data}

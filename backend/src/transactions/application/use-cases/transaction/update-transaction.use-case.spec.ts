@@ -7,6 +7,7 @@ import {
   Transaction,
   TransactionNotFoundError,
   TransactionType,
+  TransactionUpdatedEvent,
 } from '@/transactions/domain';
 import {
   InMemoryCategoryRepository,
@@ -150,5 +151,31 @@ describe('UpdateTransactionUseCase', () => {
     });
     expect(dto.categoryId).toBe('cat-2');
     expect(dto.subcategoryId).toBe('sub-2');
+  });
+
+  it('emits TransactionUpdatedEvent carrying previous snapshot', async () => {
+    subcategoryRepository.seed([
+      makeSubcategory('sub-1', 'cat-1'),
+      makeSubcategory('sub-2', 'cat-2'),
+    ]);
+    transactionRepository.seed([makeTransaction('txn-1', 'cat-1', 'sub-1')]);
+
+    await useCase.execute({
+      id: 'txn-1',
+      userId: USER_ID,
+      categoryId: 'cat-2',
+      subcategoryId: 'sub-2',
+      date: new Date('2024-03-03'),
+    });
+
+    const event = eventDispatcher.dispatched.find((e) => e instanceof TransactionUpdatedEvent) as
+      | TransactionUpdatedEvent
+      | undefined;
+    expect(event).toBeDefined();
+    expect(event?.payload.categoryId).toBe('cat-2');
+    expect(event?.payload.subcategoryId).toBe('sub-2');
+    expect(event?.payload.previous.categoryId).toBe('cat-1');
+    expect(event?.payload.previous.subcategoryId).toBe('sub-1');
+    expect(event?.payload.previous.date).toEqual(new Date('2024-01-01'));
   });
 });

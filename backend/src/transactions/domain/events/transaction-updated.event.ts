@@ -1,6 +1,13 @@
 import type { DomainEvent, MoneySnapshot } from '@/shared/domain';
 import type { TransactionType } from '../value-objects/transaction-type';
 
+export interface TransactionUpdatedPreviousSnapshot {
+  amount: MoneySnapshot;
+  categoryId: string;
+  subcategoryId: string | null;
+  date: Date;
+}
+
 export interface TransactionUpdatedPayload {
   transactionId: string;
   userId: string;
@@ -10,6 +17,7 @@ export interface TransactionUpdatedPayload {
   subcategoryId: string | null;
   description: string;
   date: Date;
+  previous: TransactionUpdatedPreviousSnapshot;
 }
 
 export class TransactionUpdatedEvent implements DomainEvent {

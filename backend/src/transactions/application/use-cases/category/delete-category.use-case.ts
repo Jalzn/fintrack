@@ -1,3 +1,5 @@
+import { CategoryHasBudgetsError } from '@/budgets/application';
+import type { IBudgetRepository } from '@/budgets/domain';
 import type { IDomainEventDispatcher } from '@/shared/application';
 import {
   CategoryDeletedEvent,
@@ -11,6 +13,7 @@ import { type DeleteCategoryInput, DeleteCategoryInputSchema } from '../../schem
 interface Deps {
   categoryRepository: ICategoryRepository;
   subcategoryRepository: ISubcategoryRepository;
+  budgetRepository: IBudgetRepository;
   eventDispatcher: IDomainEventDispatcher;
 }
 
@@ -29,6 +32,9 @@ export class DeleteCategoryUseCase {
     if (subcategoryCount > 0) {
       throw new CategoryHasSubcategoriesError(parsed.id, subcategoryCount);
     }
+
+    const budgetCount = await this.deps.budgetRepository.countByCategory(parsed.id);
+    if (budgetCount > 0) throw new CategoryHasBudgetsError(parsed.id, budgetCount);
 
     const { transactionCount } = await this.deps.categoryRepository.deleteIfUnused(
       parsed.id,

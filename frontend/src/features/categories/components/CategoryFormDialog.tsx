@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { ColorSwatchInput } from '@/components/ColorSwatchInput';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -28,7 +29,6 @@ import type { Category, TransactionType } from '@/types/api';
 import { useCreateCategoryMutation } from '../hooks/use-create-category';
 import { useUpdateCategoryMutation } from '../hooks/use-update-category';
 import { type CategoryFormInput, categoryFormSchema } from '../schemas/category-schemas';
-import { ColorSwatchInput } from './ColorSwatchInput';
 
 const TYPE_OPTIONS = [
   { value: 'EXPENSE', label: 'Despesa' },

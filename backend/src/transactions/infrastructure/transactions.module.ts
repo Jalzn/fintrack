@@ -1,6 +1,9 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { PinoLogger } from 'nestjs-pino';
+import type { IBudgetRepository } from '@/budgets/domain';
+import { BudgetsModule } from '@/budgets/infrastructure/budgets.module';
+import { BUDGET_REPOSITORY } from '@/budgets/infrastructure/tokens';
 import type { IDomainEventDispatcher, IIdGenerator } from '@/shared/application';
 import { DRIZZLE_DB } from '@/shared/infrastructure/database/drizzle.tokens';
 import { EVENT_DISPATCHER, ID_GENERATOR } from '@/shared/infrastructure/shared.tokens';
@@ -58,7 +61,7 @@ import {
 } from './tokens';
 
 @Module({
-  imports: [UsersModule],
+  imports: [UsersModule, forwardRef(() => BudgetsModule)],
   controllers: [TransactionsController, CategoriesController, SubcategoriesController],
   providers: [
     // --- Repositories ---
@@ -198,14 +201,16 @@ import {
       useFactory: (
         categoryRepository: ICategoryRepository,
         subcategoryRepository: ISubcategoryRepository,
+        budgetRepository: IBudgetRepository,
         eventDispatcher: IDomainEventDispatcher,
       ) =>
         new DeleteCategoryUseCase({
           categoryRepository,
           subcategoryRepository,
+          budgetRepository,
           eventDispatcher,
         }),
-      inject: [CATEGORY_REPOSITORY, SUBCATEGORY_REPOSITORY, EVENT_DISPATCHER],
+      inject: [CATEGORY_REPOSITORY, SUBCATEGORY_REPOSITORY, BUDGET_REPOSITORY, EVENT_DISPATCHER],
     },
 
     // --- Subcategory use cases ---
@@ -249,10 +254,19 @@ import {
       provide: DELETE_SUBCATEGORY_UC,
       useFactory: (
         subcategoryRepository: ISubcategoryRepository,
+        budgetRepository: IBudgetRepository,
         eventDispatcher: IDomainEventDispatcher,
-      ) => new DeleteSubcategoryUseCase({ subcategoryRepository, eventDispatcher }),
-      inject: [SUBCATEGORY_REPOSITORY, EVENT_DISPATCHER],
+      ) =>
+        new DeleteSubcategoryUseCase({ subcategoryRepository, budgetRepository, eventDispatcher }),
+      inject: [SUBCATEGORY_REPOSITORY, BUDGET_REPOSITORY, EVENT_DISPATCHER],
     },
+  ],
+  exports: [
+    TRANSACTION_REPOSITORY,
+    CATEGORY_REPOSITORY,
+    SUBCATEGORY_REPOSITORY,
+    CREATE_TRANSACTION_UC,
+    DELETE_TRANSACTION_UC,
   ],
 })
 export class TransactionsModule {}

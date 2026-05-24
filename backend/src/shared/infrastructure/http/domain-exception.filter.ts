@@ -3,6 +3,21 @@ import { Catch, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/co
 import type { FastifyReply } from 'fastify';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  BudgetCategoryReferenceError,
+  BudgetCategoryTypeError,
+  BudgetSubcategoryMismatchError,
+  BudgetSubcategoryReferenceError,
+  CategoryHasBudgetsError,
+  DuplicateBudgetError,
+  SubcategoryHasBudgetsError,
+} from '@/budgets/application';
+import { BudgetNotFoundError, InvalidBudgetError } from '@/budgets/domain';
+import {
+  GrocerySettingsNotConfiguredError,
+  ReceiptExtractionFailedError,
+} from '@/grocery-receipts/application';
+import { GroceryReceiptNotFoundError } from '@/grocery-receipts/domain';
+import {
   CategoryHasSubcategoriesError,
   CategoryInUseError,
   InvalidCategoryReferenceError,
@@ -38,7 +53,9 @@ export class DomainExceptionFilter implements ExceptionFilter {
     if (
       exception instanceof TransactionNotFoundError ||
       exception instanceof CategoryNotFoundError ||
-      exception instanceof SubcategoryNotFoundError
+      exception instanceof SubcategoryNotFoundError ||
+      exception instanceof BudgetNotFoundError ||
+      exception instanceof GroceryReceiptNotFoundError
     ) {
       void reply.status(HttpStatus.NOT_FOUND).send({
         statusCode: 404,
@@ -54,10 +71,33 @@ export class DomainExceptionFilter implements ExceptionFilter {
       exception instanceof InvalidSubcategoryError ||
       exception instanceof InvalidCategoryReferenceError ||
       exception instanceof InvalidSubcategoryReferenceError ||
-      exception instanceof SubcategoryCategoryMismatchError
+      exception instanceof SubcategoryCategoryMismatchError ||
+      exception instanceof InvalidBudgetError ||
+      exception instanceof BudgetCategoryReferenceError ||
+      exception instanceof BudgetSubcategoryReferenceError ||
+      exception instanceof BudgetSubcategoryMismatchError ||
+      exception instanceof BudgetCategoryTypeError
     ) {
       void reply.status(HttpStatus.BAD_REQUEST).send({
         statusCode: 400,
+        message: exception.message,
+        error: exception.code,
+      });
+      return;
+    }
+
+    if (exception instanceof ReceiptExtractionFailedError) {
+      void reply.status(HttpStatus.UNPROCESSABLE_ENTITY).send({
+        statusCode: 422,
+        message: exception.message,
+        error: exception.code,
+      });
+      return;
+    }
+
+    if (exception instanceof GrocerySettingsNotConfiguredError) {
+      void reply.status(HttpStatus.CONFLICT).send({
+        statusCode: 409,
         message: exception.message,
         error: exception.code,
       });
@@ -90,6 +130,35 @@ export class DomainExceptionFilter implements ExceptionFilter {
         message: exception.message,
         error: exception.code,
         transactionCount: exception.transactionCount,
+      });
+      return;
+    }
+
+    if (exception instanceof DuplicateBudgetError) {
+      void reply.status(HttpStatus.CONFLICT).send({
+        statusCode: 409,
+        message: exception.message,
+        error: exception.code,
+      });
+      return;
+    }
+
+    if (exception instanceof CategoryHasBudgetsError) {
+      void reply.status(HttpStatus.CONFLICT).send({
+        statusCode: 409,
+        message: exception.message,
+        error: exception.code,
+        budgetCount: exception.budgetCount,
+      });
+      return;
+    }
+
+    if (exception instanceof SubcategoryHasBudgetsError) {
+      void reply.status(HttpStatus.CONFLICT).send({
+        statusCode: 409,
+        message: exception.message,
+        error: exception.code,
+        budgetCount: exception.budgetCount,
       });
       return;
     }

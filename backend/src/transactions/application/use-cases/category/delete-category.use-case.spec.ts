@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { Money, USD } from '@/shared/domain';
+import { CategoryHasBudgetsError } from '@/budgets/application';
+import { Budget } from '@/budgets/domain';
+import { InMemoryBudgetRepository } from '@/budgets/infrastructure/persistence/repository/in-memory-budget.repository';
+import { BRL, Money, USD } from '@/shared/domain';
 import { InMemoryDomainEventDispatcher } from '@/shared/infrastructure';
 import {
   Category,
@@ -55,6 +58,7 @@ describe('DeleteCategoryUseCase', () => {
   let categoryRepository: InMemoryCategoryRepository;
   let subcategoryRepository: InMemorySubcategoryRepository;
   let transactionRepository: InMemoryTransactionRepository;
+  let budgetRepository: InMemoryBudgetRepository;
   let eventDispatcher: InMemoryDomainEventDispatcher;
   let useCase: DeleteCategoryUseCase;
 
@@ -62,12 +66,14 @@ describe('DeleteCategoryUseCase', () => {
     categoryRepository = new InMemoryCategoryRepository();
     subcategoryRepository = new InMemorySubcategoryRepository();
     transactionRepository = new InMemoryTransactionRepository();
+    budgetRepository = new InMemoryBudgetRepository();
     categoryRepository.setTransactionStore(transactionRepository.getStore());
     subcategoryRepository.setTransactionStore(transactionRepository.getStore());
     eventDispatcher = new InMemoryDomainEventDispatcher();
     useCase = new DeleteCategoryUseCase({
       categoryRepository,
       subcategoryRepository,
+      budgetRepository,
       eventDispatcher,
     });
   });
@@ -113,5 +119,24 @@ describe('DeleteCategoryUseCase', () => {
     await expect(useCase.execute({ id: 'cat-1', userId: USER_ID })).rejects.toMatchObject({
       transactionCount: 2,
     });
+  });
+
+  it('throws CategoryHasBudgetsError when budgets reference the category', async () => {
+    categoryRepository.seed([makeCategory()]);
+    const b = Budget.create({
+      id: 'b-1',
+      userId: USER_ID,
+      name: 'Orçamento',
+      color: '#4a8ee8',
+      scopes: [{ categoryId: 'cat-1', subcategoryId: null }],
+      periodStart: new Date(Date.UTC(2026, 4, 1)),
+      planned: Money.of(50000, BRL),
+    });
+    b.clearDomainEvents();
+    budgetRepository.seed([b]);
+
+    await expect(useCase.execute({ id: 'cat-1', userId: USER_ID })).rejects.toThrow(
+      CategoryHasBudgetsError,
+    );
   });
 });

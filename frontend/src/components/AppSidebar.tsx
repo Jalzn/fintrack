@@ -4,7 +4,9 @@ import {
   LayoutDashboard,
   LogOut,
   Moon,
+  PiggyBank,
   Settings,
+  ShoppingCart,
   Sun,
   Tags,
   Wallet,
@@ -46,6 +48,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', to: '/', icon: LayoutDashboard },
   { label: 'Transações', to: '/transacoes', icon: ArrowLeftRight },
+  { label: 'Mercado', to: '/mercado', icon: ShoppingCart },
+  { label: 'Orçamentos', to: '/orcamentos', icon: PiggyBank },
   { label: 'Categorias', to: '/categorias', icon: Tags },
   { label: 'Ajustes', to: '/ajustes', icon: Settings, disabled: true },
 ];

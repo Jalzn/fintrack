@@ -8,7 +8,12 @@ export function useCreateTransactionMutation() {
   return useMutation<Transaction, Error, CreateTransactionPayload>({
     mutationFn: createTransaction,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: transactionKeys.all });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
+        queryClient.invalidateQueries({
+          predicate: (q) => q.queryKey[0] === 'budgets',
+        }),
+      ]);
     },
   });
 }
