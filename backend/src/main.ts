@@ -10,9 +10,11 @@ import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
-    bufferLogs: true,
-  });
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter({ bodyLimit: 12 * 1024 * 1024 }),
+    { bufferLogs: true },
+  );
 
   app.useLogger(app.get(Logger));
   app.enableShutdownHooks();

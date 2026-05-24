@@ -7,13 +7,14 @@ interface ColorSwatchInputProps {
   value: string;
   onChange: (hex: string) => void;
   id?: string;
+  label?: string;
 }
 
-export function ColorSwatchInput({ value, onChange, id }: ColorSwatchInputProps) {
+export function ColorSwatchInput({ value, onChange, id, label = 'Cor' }: ColorSwatchInputProps) {
   const groupName = useId();
   return (
     <fieldset id={id} className="flex flex-wrap gap-2 border-0 p-0">
-      <legend className="sr-only">Cor da categoria</legend>
+      <legend className="sr-only">{label}</legend>
       {CATEGORY_COLORS.map((color) => {
         const isSelected = color.hex.toLowerCase() === value.toLowerCase();
         return (

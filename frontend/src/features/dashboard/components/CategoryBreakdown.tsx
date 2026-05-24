@@ -1,86 +1,23 @@
-import { useMemo } from 'react';
+import { useNavigate } from 'react-router';
+import { Cell, Pie, PieChart } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCategoriesQuery } from '@/features/categories/hooks/use-categories-query';
-import { useTransactionsQuery } from '@/features/transactions/hooks/use-transactions-query';
-import { CATEGORY_COLORS, colorFromHex } from '@/lib/category-colors';
+import { usePeriod } from '@/hooks/use-period';
+import { colorFromHex } from '@/lib/category-colors';
 import { formatMoney } from '@/lib/money';
 import { cn } from '@/lib/utils';
-import type { MoneySnapshot } from '@/types/api';
-
-const BRL = { code: 'BRL', base: 10, exponent: 2 };
-const FALLBACK_PALETTE = CATEGORY_COLORS.map((c) => c.hex);
-
-interface BreakdownRow {
-  id: string;
-  label: string;
-  amount: MoneySnapshot;
-  percent: number;
-  hex: string;
-}
-
-function getMonthRange(): { startDate: string; endDate: string } {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-  return { startDate: start.toISOString(), endDate: end.toISOString() };
-}
-
-function buildConicGradient(rows: BreakdownRow[]): string {
-  if (rows.length === 0) return 'conic-gradient(var(--muted) 0% 100%)';
-  const stops: string[] = [];
-  let acc = 0;
-  for (const row of rows) {
-    const start = acc;
-    const end = acc + row.percent;
-    stops.push(`${row.hex} ${start}% ${end}%`);
-    acc = end;
-  }
-  return `conic-gradient(${stops.join(', ')})`;
-}
+import { useCategorySpend } from '../hooks/use-category-spend';
 
 export function CategoryBreakdown() {
-  const range = useMemo(getMonthRange, []);
-  const { data: transactions, isLoading: isTxLoading } = useTransactionsQuery({
-    type: 'EXPENSE',
-    startDate: range.startDate,
-    endDate: range.endDate,
-    page: 1,
-    limit: 100,
-  });
-  const { data: categories } = useCategoriesQuery();
+  const { period } = usePeriod();
+  const navigate = useNavigate();
+  const { rows, totalMoney, isLoading } = useCategorySpend(period);
 
-  const { rows, total } = useMemo(() => {
-    const txList = transactions?.data ?? [];
-    if (txList.length === 0 || !categories) {
-      return { rows: [] as BreakdownRow[], total: 0 };
-    }
-
-    const totals = new Map<string, number>();
-    for (const tx of txList) {
-      totals.set(tx.categoryId, (totals.get(tx.categoryId) ?? 0) + tx.amount.amount);
-    }
-    const grandTotal = [...totals.values()].reduce((a, b) => a + b, 0);
-    if (grandTotal === 0) return { rows: [] as BreakdownRow[], total: 0 };
-
-    const sorted = [...totals.entries()]
-      .map(([categoryId, amount], idx) => {
-        const cat = categories.find((c) => c.id === categoryId);
-        const fallback = FALLBACK_PALETTE[idx % FALLBACK_PALETTE.length] ?? '#999999';
-        return {
-          id: categoryId,
-          label: cat?.name ?? 'Sem categoria',
-          amount: { amount, currency: BRL } satisfies MoneySnapshot,
-          percent: Math.round((amount / grandTotal) * 100),
-          hex: cat?.color ?? fallback,
-        };
-      })
-      .sort((a, b) => b.amount.amount - a.amount.amount);
-
-    return { rows: sorted, total: grandTotal };
-  }, [transactions, categories]);
-
-  const conicStyle = useMemo(() => ({ backgroundImage: buildConicGradient(rows) }), [rows]);
+  const goToCategory = (categoryId: string) => {
+    const params = new URLSearchParams({ type: 'EXPENSE', categoryId, period });
+    navigate(`/transacoes?${params.toString()}`);
+  };
 
   return (
     <Card>
@@ -89,43 +26,72 @@ export function CategoryBreakdown() {
         <CardDescription>Despesas do mês agrupadas</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {isTxLoading ? (
-          <Skeleton className="mx-auto h-40 w-40 rounded-full" />
+        {isLoading ? (
+          <Skeleton className="mx-auto h-48 w-48 rounded-full" />
         ) : rows.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border p-8 text-center">
-            <p className="text-sm text-muted-foreground">Sem despesas neste mês.</p>
+          <div className="rounded-lg border border-border border-dashed p-8 text-center">
+            <p className="text-muted-foreground text-sm">Sem despesas neste mês.</p>
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-center py-2">
-              <div
-                className="relative flex size-40 items-center justify-center rounded-full"
-                style={conicStyle}
-                aria-hidden="true"
-              >
-                <div className="flex size-28 flex-col items-center justify-center rounded-full bg-card shadow-sm ring-1 ring-foreground/5">
-                  <span className="text-muted-foreground text-xs">Total</span>
-                  <span className="font-heading font-semibold text-lg tabular-nums">
-                    {formatMoney({ amount: total, currency: BRL })}
-                  </span>
-                </div>
+            <div className="relative mx-auto aspect-square w-48">
+              <ChartContainer config={{}} className="h-full w-full">
+                <PieChart>
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        nameKey="name"
+                        formatter={(_value, _name, item) => formatMoney(item.payload.amount)}
+                      />
+                    }
+                  />
+                  <Pie
+                    data={rows}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={58}
+                    outerRadius={82}
+                    strokeWidth={2}
+                    isAnimationActive={false}
+                    onClick={(_, index) => {
+                      const id = rows[index]?.id;
+                      if (id) goToCategory(id);
+                    }}
+                  >
+                    {rows.map((row) => (
+                      <Cell key={row.id} fill={row.hex} className="cursor-pointer outline-none" />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ChartContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-muted-foreground text-xs">Total</span>
+                <span className="font-heading font-semibold text-lg tabular-nums">
+                  {formatMoney(totalMoney)}
+                </span>
               </div>
             </div>
 
-            <ul className="space-y-3">
+            <ul className="space-y-1">
               {rows.map((row) => {
                 const color = colorFromHex(row.hex);
                 return (
-                  <li key={row.id} className="flex items-center gap-3 text-sm">
-                    <span
-                      className={cn('size-2.5 shrink-0 rounded-full', color.bgClass)}
-                      aria-hidden
-                    />
-                    <span className="flex-1 truncate">{row.label}</span>
-                    <span className="text-muted-foreground tabular-nums">{row.percent}%</span>
-                    <span className="w-20 text-right font-medium tabular-nums">
-                      {formatMoney(row.amount)}
-                    </span>
+                  <li key={row.id}>
+                    <button
+                      type="button"
+                      onClick={() => goToCategory(row.id)}
+                      className="flex w-full items-center gap-3 rounded-md px-1 py-1.5 text-left text-sm hover:bg-accent"
+                    >
+                      <span
+                        className={cn('size-2.5 shrink-0 rounded-full', color.bgClass)}
+                        aria-hidden
+                      />
+                      <span className="flex-1 truncate">{row.name}</span>
+                      <span className="text-muted-foreground tabular-nums">{row.percent}%</span>
+                      <span className="w-20 text-right font-medium tabular-nums">
+                        {formatMoney(row.amount)}
+                      </span>
+                    </button>
                   </li>
                 );
               })}

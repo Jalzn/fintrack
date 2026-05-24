@@ -8,6 +8,8 @@ export default defineConfig({
   schema: [
     './src/transactions/infrastructure/persistence/schema/index.ts',
     './src/users/infrastructure/persistence/schema/index.ts',
+    './src/budgets/infrastructure/persistence/schema/index.ts',
+    './src/grocery-receipts/infrastructure/persistence/schema/index.ts',
   ],
   out: './drizzle/migrations',
   dbCredentials: { url },

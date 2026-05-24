@@ -29,6 +29,41 @@
       "when": 1778256786687,
       "tag": "0003_gorgeous_catseye",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778341397328,
+      "tag": "0004_lean_archangel",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779507180977,
+      "tag": "0005_messy_arclight",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779509574399,
+      "tag": "0006_hot_typhoid_mary",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779547137672,
+      "tag": "0007_plain_chimera",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1779553009510,
+      "tag": "0008_aggregated_budgets",
+      "breakpoints": true
     }
   ]
 }

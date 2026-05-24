@@ -41,7 +41,15 @@ describe('DeleteTransactionUseCase', () => {
     transactionRepository.seed([makeTransaction()]);
     await useCase.execute({ id: 'txn-1', userId: USER_ID });
     expect(await transactionRepository.findById('txn-1', USER_ID)).toBeNull();
-    expect(eventDispatcher.dispatched[0]).toBeInstanceOf(TransactionDeletedEvent);
+    const event = eventDispatcher.dispatched[0];
+    expect(event).toBeInstanceOf(TransactionDeletedEvent);
+    expect((event as TransactionDeletedEvent).payload).toMatchObject({
+      transactionId: 'txn-1',
+      userId: USER_ID,
+      type: TransactionType.EXPENSE,
+      categoryId: 'cat-1',
+      subcategoryId: null,
+    });
   });
 
   it('throws TransactionNotFoundError when transaction does not exist', async () => {

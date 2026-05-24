@@ -1,3 +1,5 @@
+import { SubcategoryHasBudgetsError } from '@/budgets/application';
+import type { IBudgetRepository } from '@/budgets/domain';
 import type { IDomainEventDispatcher } from '@/shared/application';
 import {
   type ISubcategoryRepository,
@@ -9,6 +11,7 @@ import { type DeleteSubcategoryInput, DeleteSubcategoryInputSchema } from '../..
 
 interface Deps {
   subcategoryRepository: ISubcategoryRepository;
+  budgetRepository: IBudgetRepository;
   eventDispatcher: IDomainEventDispatcher;
 }
 
@@ -19,6 +22,9 @@ export class DeleteSubcategoryUseCase {
     const parsed = DeleteSubcategoryInputSchema.parse(input);
     const subcategory = await this.deps.subcategoryRepository.findById(parsed.id, parsed.userId);
     if (!subcategory) throw new SubcategoryNotFoundError(parsed.id);
+
+    const budgetCount = await this.deps.budgetRepository.countBySubcategory(parsed.id);
+    if (budgetCount > 0) throw new SubcategoryHasBudgetsError(parsed.id, budgetCount);
 
     const { transactionCount } = await this.deps.subcategoryRepository.deleteIfUnused(
       parsed.id,

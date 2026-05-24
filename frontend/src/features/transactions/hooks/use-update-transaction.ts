@@ -13,7 +13,12 @@ export function useUpdateTransactionMutation() {
   return useMutation<Transaction, Error, Variables>({
     mutationFn: ({ id, payload }) => updateTransaction(id, payload),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: transactionKeys.all });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
+        queryClient.invalidateQueries({
+          predicate: (q) => q.queryKey[0] === 'budgets',
+        }),
+      ]);
     },
   });
 }

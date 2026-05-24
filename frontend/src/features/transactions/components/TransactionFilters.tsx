@@ -1,7 +1,7 @@
+import { CategoryCombobox } from '@/components/CategoryCombobox';
+import { SubcategoryCombobox } from '@/components/SubcategoryCombobox';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { TransactionType } from '@/types/api';
-import { CategoryCombobox } from './CategoryCombobox';
-import { SubcategoryCombobox } from './SubcategoryCombobox';
 
 export type TypeFilter = 'all' | TransactionType;
 

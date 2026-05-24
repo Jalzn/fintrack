@@ -21,7 +21,18 @@ export class DeleteTransactionUseCase {
     const transaction = await this.deps.transactionRepository.findById(parsed.id, parsed.userId);
     if (!transaction) throw new TransactionNotFoundError(parsed.id);
     await this.deps.transactionRepository.delete(parsed.id, parsed.userId);
-    await this.deps.eventDispatcher.dispatch([new TransactionDeletedEvent(parsed.id)]);
+    await this.deps.eventDispatcher.dispatch([
+      new TransactionDeletedEvent({
+        transactionId: transaction.id,
+        userId: transaction.userId,
+        amount: transaction.amount.toSnapshot(),
+        type: transaction.type,
+        categoryId: transaction.categoryId,
+        subcategoryId: transaction.subcategoryId,
+        date: transaction.date,
+        linkedTransactionId: transaction.linkedTransactionId,
+      }),
+    ]);
     this.deps.logger?.info(
       { transactionId: parsed.id, userId: parsed.userId },
       'Transaction deleted',

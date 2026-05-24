@@ -22,6 +22,7 @@ interface CategoryComboboxProps {
   onChange: (categoryId: string) => void;
   'aria-invalid'?: boolean;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export function CategoryCombobox({
@@ -30,6 +31,7 @@ export function CategoryCombobox({
   type,
   onChange,
   placeholder = 'Selecione uma categoria',
+  disabled,
   ...rest
 }: CategoryComboboxProps) {
   const [open, setOpen] = useState(false);
@@ -41,6 +43,7 @@ export function CategoryCombobox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
+        disabled={disabled}
         render={
           <Button
             type="button"
@@ -48,6 +51,7 @@ export function CategoryCombobox({
             id={id}
             className="w-full justify-between"
             aria-invalid={rest['aria-invalid']}
+            disabled={disabled}
           />
         }
       >
