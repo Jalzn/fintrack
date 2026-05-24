@@ -51,6 +51,8 @@ export function ReceiptUploader({ onImported, disabled = false }: ReceiptUploade
         toast.error('Não consegui ler o total do cupom. Tente uma foto mais nítida.');
       } else if (error instanceof ApiError && error.status === 409) {
         toast.error('Configure a categoria de destino antes de importar.');
+      } else if (error instanceof ApiError && error.status === 413) {
+        toast.error('Imagem muito grande. Tente uma foto menor.');
       } else {
         toast.error('Erro ao importar a nota.');
       }
