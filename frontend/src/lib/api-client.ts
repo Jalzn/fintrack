@@ -67,7 +67,6 @@ async function refreshAccessToken(): Promise<string | null> {
       const res = await fetch(`${API_URL}/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
       });
       if (!res.ok) return null;
       const data = (await res.json()) as { accessToken?: unknown };
@@ -94,13 +93,14 @@ async function doFetch<TResponse>(
   const { method = 'GET', body, schema } = options;
   const token = tokenStorage.get();
 
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = {};
   if (token !== null) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
   const init: RequestInit = { method, headers, credentials: 'include' };
   if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
     init.body = JSON.stringify(body);
   }
 
