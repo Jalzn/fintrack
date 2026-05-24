@@ -19,3 +19,5 @@ const DEPARTMENT_LABELS: Record<GroceryDepartment, string> = {
 export function departmentLabel(slug: string): string {
   return DEPARTMENT_LABELS[slug as GroceryDepartment] ?? slug;
 }
+
+export const GROCERY_DEPARTMENTS = Object.keys(DEPARTMENT_LABELS) as GroceryDepartment[];

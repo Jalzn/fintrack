@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import type { GroceryReceipt } from '@/types/api';
 import { DeleteReceiptAlert } from './DeleteReceiptAlert';
 import { ReceiptDetailDialog } from './ReceiptDetailDialog';
+import { ReceiptEditDialog } from './ReceiptEditDialog';
 import { ReceiptList } from './ReceiptList';
 
 interface RecentReceiptsProps {
@@ -14,6 +15,7 @@ interface RecentReceiptsProps {
 /** Compact "latest purchases" block for the overview, linking to the full archive. */
 export function RecentReceipts({ receipts, isLoading, isError }: RecentReceiptsProps) {
   const [viewingId, setViewingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<GroceryReceipt | null>(null);
 
   return (
@@ -32,12 +34,19 @@ export function RecentReceipts({ receipts, isLoading, isError }: RecentReceiptsP
         isLoading={isLoading}
         isError={isError}
         onView={setViewingId}
+        onEdit={(receipt) => setEditingId(receipt.id)}
         onDelete={setDeleting}
       />
       <ReceiptDetailDialog
         receiptId={viewingId}
         onOpenChange={(open) => {
           if (!open) setViewingId(null);
+        }}
+      />
+      <ReceiptEditDialog
+        receiptId={editingId}
+        onOpenChange={(open) => {
+          if (!open) setEditingId(null);
         }}
       />
       <DeleteReceiptAlert

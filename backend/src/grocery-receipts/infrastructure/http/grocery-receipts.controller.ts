@@ -24,6 +24,7 @@ import type {
   ListReceiptsUseCase,
   PriceAnalysisDTO,
   UpdateGrocerySettingsUseCase,
+  UpdateReceiptUseCase,
 } from '@/grocery-receipts/application';
 import {
   AnalyzePricesInputSchema,
@@ -34,6 +35,7 @@ import {
   ImportReceiptInputSchema,
   ListReceiptsInputSchema,
   UpdateGrocerySettingsInputSchema,
+  UpdateReceiptInputSchema,
 } from '@/grocery-receipts/application';
 import type { PaginatedResult } from '@/shared/application';
 import { parseInput } from '@/shared/infrastructure';
@@ -48,6 +50,7 @@ import {
   IMPORT_RECEIPT_UC,
   LIST_RECEIPTS_UC,
   UPDATE_GROCERY_SETTINGS_UC,
+  UPDATE_RECEIPT_UC,
 } from '../tokens';
 
 @UseGuards(JwtAuthGuard)
@@ -57,6 +60,7 @@ export class GroceryReceiptsController {
     @Inject(IMPORT_RECEIPT_UC) private readonly importReceipt: ImportReceiptFromImageUseCase,
     @Inject(LIST_RECEIPTS_UC) private readonly listReceipts: ListReceiptsUseCase,
     @Inject(GET_RECEIPT_BY_ID_UC) private readonly getReceiptById: GetReceiptByIdUseCase,
+    @Inject(UPDATE_RECEIPT_UC) private readonly updateReceipt: UpdateReceiptUseCase,
     @Inject(DELETE_RECEIPT_UC) private readonly deleteReceipt: DeleteReceiptUseCase,
     @Inject(ANALYZE_PRICES_UC) private readonly analyzePrices: AnalyzePricesUseCase,
     @Inject(GET_GROCERY_SUMMARY_UC) private readonly grocerySummary: GetGrocerySummaryUseCase,
@@ -124,6 +128,17 @@ export class GroceryReceiptsController {
   ): Promise<GroceryReceiptDTO> {
     return this.getReceiptById.execute(
       parseInput(GetReceiptByIdInputSchema, { ...(params as object), userId }),
+    );
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() userId: string,
+  ): Promise<GroceryReceiptDTO> {
+    return this.updateReceipt.execute(
+      parseInput(UpdateReceiptInputSchema, { ...(body as object), id, userId }),
     );
   }
 

@@ -16,6 +16,14 @@ export class InMemoryGroceryReceiptRepository implements IGroceryReceiptReposito
     return receipt && receipt.userId === userId ? receipt : null;
   }
 
+  async findByTransactionId(transactionId: string, userId: string): Promise<GroceryReceipt | null> {
+    return (
+      [...this.store.values()].find(
+        (receipt) => receipt.transactionId === transactionId && receipt.userId === userId,
+      ) ?? null
+    );
+  }
+
   async findAll(filters: FindReceiptFilters): Promise<PaginatedReceipts> {
     const results = this.filterByUserAndDate(filters).sort(
       (a, b) => b.purchaseDate.getTime() - a.purchaseDate.getTime(),

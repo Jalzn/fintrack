@@ -17,13 +17,20 @@ export interface GroceryReceiptProps extends CreateGroceryReceiptProps {
   createdAt: Date;
 }
 
+export interface UpdateGroceryReceiptProps {
+  storeName?: string;
+  purchaseDate?: Date;
+  total?: Money;
+  items?: GroceryItem[];
+}
+
 export class GroceryReceipt extends BaseEntity {
   private readonly _userId: string;
-  private readonly _storeName: string;
-  private readonly _purchaseDate: Date;
-  private readonly _total: Money;
+  private _storeName: string;
+  private _purchaseDate: Date;
+  private _total: Money;
   private _transactionId: string | null;
-  private readonly _items: GroceryItem[];
+  private _items: GroceryItem[];
   private readonly _createdAt: Date;
 
   private constructor(props: GroceryReceiptProps) {
@@ -70,6 +77,22 @@ export class GroceryReceipt extends BaseEntity {
       throw new InvalidGroceryReceiptError('transactionId must not be empty');
     }
     this._transactionId = transactionId;
+  }
+
+  update(props: UpdateGroceryReceiptProps): void {
+    const next: CreateGroceryReceiptProps = {
+      id: this.id,
+      userId: this._userId,
+      storeName: props.storeName ?? this._storeName,
+      purchaseDate: props.purchaseDate ?? this._purchaseDate,
+      total: props.total ?? this._total,
+      items: props.items ?? this._items,
+    };
+    GroceryReceipt.validate(next);
+    this._storeName = next.storeName;
+    this._purchaseDate = next.purchaseDate;
+    this._total = next.total;
+    this._items = [...next.items];
   }
 
   static restore(props: GroceryReceiptProps): GroceryReceipt {

@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,10 +21,18 @@ interface ReceiptListProps {
   isLoading: boolean;
   isError: boolean;
   onView: (id: string) => void;
+  onEdit: (receipt: GroceryReceipt) => void;
   onDelete: (receipt: GroceryReceipt) => void;
 }
 
-export function ReceiptList({ receipts, isLoading, isError, onView, onDelete }: ReceiptListProps) {
+export function ReceiptList({
+  receipts,
+  isLoading,
+  isError,
+  onView,
+  onEdit,
+  onDelete,
+}: ReceiptListProps) {
   if (isError) {
     return <p className="text-sm text-destructive">Erro ao carregar as notas.</p>;
   }
@@ -67,6 +75,14 @@ export function ReceiptList({ receipts, isLoading, isError, onView, onDelete }: 
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Editar nota"
+              onClick={() => onEdit(receipt)}
+            >
+              <Pencil className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               aria-label="Excluir nota"
               onClick={() => onDelete(receipt)}
             >
@@ -86,7 +102,7 @@ export function ReceiptList({ receipts, isLoading, isError, onView, onDelete }: 
             <TableHead>Mercado</TableHead>
             <TableHead>Data</TableHead>
             <TableHead className="text-right">Total</TableHead>
-            <TableHead className="w-24 text-right">Ações</TableHead>
+            <TableHead className="w-32 text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>{body}</TableBody>

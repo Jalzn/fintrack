@@ -38,6 +38,25 @@ export class DrizzleGroceryReceiptRepository implements IGroceryReceiptRepositor
     return rowsToDomain(receiptRow, itemRows);
   }
 
+  async findByTransactionId(transactionId: string, userId: string): Promise<GroceryReceipt | null> {
+    const receiptRows = await this.db
+      .select()
+      .from(groceryReceipts)
+      .where(
+        and(eq(groceryReceipts.transactionId, transactionId), eq(groceryReceipts.userId, userId)),
+      )
+      .limit(1);
+    const receiptRow = receiptRows[0];
+    if (!receiptRow) return null;
+
+    const itemRows = await this.db
+      .select()
+      .from(groceryItems)
+      .where(eq(groceryItems.receiptId, receiptRow.id));
+
+    return rowsToDomain(receiptRow, itemRows);
+  }
+
   async findAll(filters: FindReceiptFilters): Promise<PaginatedReceipts> {
     const where = and(...this.buildReceiptConditions(filters));
     const page = filters.page ?? 1;

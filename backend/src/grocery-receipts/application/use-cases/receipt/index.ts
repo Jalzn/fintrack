@@ -4,3 +4,4 @@ export * from './get-grocery-summary.use-case';
 export * from './get-receipt-by-id.use-case';
 export * from './import-receipt-from-image.use-case';
 export * from './list-receipts.use-case';
+export * from './update-receipt.use-case';

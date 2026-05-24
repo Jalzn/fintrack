@@ -6,7 +6,7 @@ export const RECEIPT_SYSTEM_PROMPT = `Você extrai dados estruturados de cupons 
 
 Regras:
 - storeName: a razão social ou nome fantasia do estabelecimento (o nome no topo do cupom), nunca o endereço. Se não identificar, retorne null.
-- purchaseDate: a data de emissão da compra no formato ISO "AAAA-MM-DD". Converta de "dd/mm/aaaa". Se não identificar, retorne null.
+- purchaseDate: a data de emissão da compra. As notas do mercado SEMPRE vêm no formato brasileiro dd/mm/aaaa (dia primeiro, depois o mês) — nunca interprete como mês/dia. Converta para o formato ISO "AAAA-MM-DD" (ex.: "03/05/2026" -> "2026-05-03"; "31/12/2025" -> "2025-12-31"). Se não identificar, retorne null.
 - currencyCode: "BRL", exceto se o cupom indicar claramente outra moeda.
 - items: uma entrada por produto comprado. Para cada item:
   - rawDescription: o texto do produto exatamente como impresso (incluindo códigos).
