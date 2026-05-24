@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +14,7 @@ import {
 import { useCategoriesQuery } from '@/features/categories/hooks/use-categories-query';
 import { useSubcategoriesQuery } from '@/features/subcategories/hooks/use-subcategories-query';
 import { colorFromHex } from '@/lib/category-colors';
+import { formatDateOnly } from '@/lib/date';
 import { formatMoney } from '@/lib/money';
 import { cn } from '@/lib/utils';
 import type { Transaction } from '@/types/api';
@@ -83,7 +83,7 @@ export function TransactionTable({
             return (
               <TableRow key={tx.id}>
                 <TableCell className="whitespace-nowrap text-muted-foreground">
-                  {format(new Date(tx.date), 'd MMM yyyy', { locale: ptBR })}
+                  {formatDateOnly(tx.date, 'd MMM yyyy', { locale: ptBR })}
                 </TableCell>
                 <TableCell className="font-medium">{tx.description}</TableCell>
                 <TableCell>

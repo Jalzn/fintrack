@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -16,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { formatDateOnly } from '@/lib/date';
 import { formatMoney } from '@/lib/money';
 import { useReceiptQuery } from '../hooks/use-receipt-query';
 import { departmentLabel } from './department-labels';
@@ -35,7 +35,7 @@ export function ReceiptDetailDialog({ receiptId, onOpenChange }: ReceiptDetailDi
           <DialogTitle>{data ? data.storeName : 'Nota'}</DialogTitle>
           <DialogDescription>
             {data
-              ? `${format(new Date(data.purchaseDate), 'dd/MM/yyyy')} · ${formatMoney(data.total)}`
+              ? `${formatDateOnly(data.purchaseDate, 'dd/MM/yyyy')} · ${formatMoney(data.total)}`
               : 'Itens da nota'}
           </DialogDescription>
         </DialogHeader>

@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ApiError } from '@/lib/api-client';
+import { dateToApiDateOnly, parseDateOnly } from '@/lib/date';
 import type { Transaction, TransactionType } from '@/types/api';
 import { useCreateTransactionMutation } from '../hooks/use-create-transaction';
 import { useUpdateTransactionMutation } from '../hooks/use-update-transaction';
@@ -78,7 +79,7 @@ export function TransactionFormDialog({ open, onOpenChange, initial }: Transacti
         type: initial.type,
         categoryId: initial.categoryId,
         subcategoryId: initial.subcategoryId,
-        date: new Date(initial.date),
+        date: parseDateOnly(initial.date),
       });
     } else {
       reset({
@@ -103,7 +104,7 @@ export function TransactionFormDialog({ open, onOpenChange, initial }: Transacti
 
   const onSubmit = handleSubmit(async (values) => {
     try {
-      const isoDate = values.date.toISOString();
+      const isoDate = dateToApiDateOnly(values.date);
       if (isEditing && initial) {
         await updateMutation.mutateAsync({
           id: initial.id,
